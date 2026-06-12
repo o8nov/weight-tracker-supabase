@@ -32,7 +32,7 @@ def save_data(date_input, weight_input):
         "weight": weight_input
     }).execute()
 
-# ---------- ФОРМА ДЛЯ ВВОДА ----------
+# ---------- ФОРМА ----------
 st.subheader("➕ Добавить новую запись")
 with st.form("weight_form"):
     col1, col2 = st.columns(2)
@@ -47,7 +47,7 @@ with st.form("weight_form"):
         st.success(f"✅ Данные за {date_input} сохранены!")
         st.rerun()
 
-# ---------- ЗАГРУЗКА ДАННЫХ ----------
+# ---------- ДАННЫЕ ----------
 df = load_data()
 
 if len(df) == 0:
@@ -56,31 +56,36 @@ if len(df) == 0:
 
 df = df.sort_values('date')
 df['diff_prev'] = df['weight'].diff().round(1)
+current = df['weight'].iloc[-1]
 
-# ---------- СТАТИСТИКА (ПЕРЕНЕСЕНА НАВЕРХ) ----------
+# ---------- СТАТИСТИКА (НАВЕРХУ) ----------
 st.subheader("🎯 Итоговая статистика")
 col1, col2, col3, col4, col5 = st.columns(5)
 
-current = df['weight'].iloc[-1]
-
 with col1:
     st.metric("Стартовый вес", f"{START_WEIGHT} кг")
-
 with col2:
     st.metric("Текущий вес", f"{current} кг", delta=f"{current - START_WEIGHT:+.1f} кг")
-
 with col3:
     st.metric("Минимальный вес", f"{df['weight'].min()} кг")
-
 with col4:
     st.metric("Максимальный вес", f"{df['weight'].max()} кг")
-
 with col5:
     remaining = current - TARGET_WEIGHT
     if remaining > 0:
         st.metric("🎯 Цель", f"{TARGET_WEIGHT} кг", delta=f"осталось {remaining:.1f} кг", delta_color="off")
     else:
         st.metric("🎯 Цель", f"{TARGET_WEIGHT} кг", delta="✅ Цель достигнута!", delta_color="normal")
+
+# ---------- ПРОГРЕСС-БАР ----------
+if current > TARGET_WEIGHT:
+    total = START_WEIGHT - TARGET_WEIGHT
+    lost = START_WEIGHT - current
+    progress = min(100, (lost / total) * 100)
+else:
+    progress = 100
+st.progress(progress / 100)
+st.caption(f"📊 Прогресс: {progress:.1f}% от цели")
 
 # ---------- ГРАФИК ----------
 st.subheader("📈 График динамики веса")
@@ -94,13 +99,3 @@ df_display = df[['date', 'weight', 'diff_prev']].copy()
 df_display['date'] = df_display['date'].astype(str)
 df_display.columns = ['Дата', 'Вес (кг)', 'Разница с предыдущим днём (кг)']
 st.dataframe(df_display, use_container_width=True)
-
-# ---------- ПРОГРЕСС ----------
-if current > TARGET_WEIGHT:
-    total = START_WEIGHT - TARGET_WEIGHT
-    lost = START_WEIGHT - current
-    progress = min(100, (lost / total) * 100)
-else:
-    progress = 100
-st.progress(progress / 100)
-st.caption(f"📊 Прогресс: {progress:.1f}% от цели")
