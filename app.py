@@ -17,7 +17,6 @@ TABLE_NAME = "weight_data"
 st.set_page_config(page_title="Мой дневник веса", layout="wide")
 st.title("📉 Мой дневник веса")
 
-
 # ---------- ФУНКЦИИ ----------
 def load_data():
     response = supabase.table(TABLE_NAME).select("*").order("date").execute()
@@ -27,13 +26,11 @@ def load_data():
     df['date'] = pd.to_datetime(df['date']).dt.date
     return df
 
-
 def save_data(date_input, weight_input):
     supabase.table(TABLE_NAME).upsert({
         "date": str(date_input),
         "weight": weight_input
     }).execute()
-
 
 # ---------- ФОРМА ДЛЯ ВВОДА ----------
 st.subheader("➕ Добавить новую запись")
@@ -44,7 +41,7 @@ with st.form("weight_form"):
     with col2:
         weight_input = st.number_input("Вес (кг)", min_value=30.0, max_value=200.0, step=0.1)
     submitted = st.form_submit_button("Сохранить")
-
+    
     if submitted:
         save_data(date_input, weight_input)
         st.success(f"✅ Данные за {date_input} сохранены!")
@@ -59,7 +56,6 @@ if len(df) == 0:
 
 df = df.sort_values('date')
 df['diff_prev'] = df['weight'].diff().round(1)
-df['diff_first'] = (df['weight'] - df['weight'].iloc[0]).round(1)
 
 # ---------- ГРАФИК ----------
 st.subheader("📈 График динамики веса")
@@ -71,7 +67,7 @@ st.plotly_chart(fig, use_container_width=True)
 st.subheader("📋 Подробная таблица")
 df_display = df.copy()
 df_display['date'] = df_display['date'].astype(str)
-df_display.columns = ['Дата', 'Вес (кг)', 'Разница с предыдущим днём (кг)', 'Разница с первым днём (кг)']
+df_display.columns = ['Дата', 'Вес (кг)', 'Разница с предыдущим днём (кг)']
 st.dataframe(df_display, use_container_width=True)
 
 # ---------- СТАТИСТИКА ----------
