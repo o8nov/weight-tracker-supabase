@@ -65,7 +65,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 # ---------- ТАБЛИЦА ----------
 st.subheader("📋 Подробная таблица")
-df_display = df.copy()
+df_display = df[['date', 'weight', 'diff_prev']].copy()
 df_display['date'] = df_display['date'].astype(str)
 df_display.columns = ['Дата', 'Вес (кг)', 'Разница с предыдущим днём (кг)']
 st.dataframe(df_display, use_container_width=True)
