@@ -57,28 +57,16 @@ if len(df) == 0:
 df = df.sort_values('date')
 df['diff_prev'] = df['weight'].diff().round(1)
 
-# ---------- ГРАФИК ----------
-st.subheader("📈 График динамики веса")
-fig = px.line(df, x='date', y='weight', markers=True)
-fig.add_hline(y=TARGET_WEIGHT, line_dash="dash", line_color="green", annotation_text=f"Цель: {TARGET_WEIGHT} кг")
-st.plotly_chart(fig, use_container_width=True)
-
-# ---------- ТАБЛИЦА ----------
-st.subheader("📋 Подробная таблица")
-df_display = df[['date', 'weight', 'diff_prev']].copy()
-df_display['date'] = df_display['date'].astype(str)
-df_display.columns = ['Дата', 'Вес (кг)', 'Разница с предыдущим днём (кг)']
-st.dataframe(df_display, use_container_width=True)
-
-# ---------- СТАТИСТИКА ----------
+# ---------- СТАТИСТИКА (ПЕРЕНЕСЕНА НАВЕРХ) ----------
 st.subheader("🎯 Итоговая статистика")
 col1, col2, col3, col4, col5 = st.columns(5)
+
+current = df['weight'].iloc[-1]
 
 with col1:
     st.metric("Стартовый вес", f"{START_WEIGHT} кг")
 
 with col2:
-    current = df['weight'].iloc[-1]
     st.metric("Текущий вес", f"{current} кг", delta=f"{current - START_WEIGHT:+.1f} кг")
 
 with col3:
@@ -93,6 +81,19 @@ with col5:
         st.metric("🎯 Цель", f"{TARGET_WEIGHT} кг", delta=f"осталось {remaining:.1f} кг", delta_color="off")
     else:
         st.metric("🎯 Цель", f"{TARGET_WEIGHT} кг", delta="✅ Цель достигнута!", delta_color="normal")
+
+# ---------- ГРАФИК ----------
+st.subheader("📈 График динамики веса")
+fig = px.line(df, x='date', y='weight', markers=True)
+fig.add_hline(y=TARGET_WEIGHT, line_dash="dash", line_color="green", annotation_text=f"Цель: {TARGET_WEIGHT} кг")
+st.plotly_chart(fig, use_container_width=True)
+
+# ---------- ТАБЛИЦА ----------
+st.subheader("📋 Подробная таблица")
+df_display = df[['date', 'weight', 'diff_prev']].copy()
+df_display['date'] = df_display['date'].astype(str)
+df_display.columns = ['Дата', 'Вес (кг)', 'Разница с предыдущим днём (кг)']
+st.dataframe(df_display, use_container_width=True)
 
 # ---------- ПРОГРЕСС ----------
 if current > TARGET_WEIGHT:
